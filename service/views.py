@@ -20,10 +20,8 @@ class serviceForm(forms.Form):
 # 保存服务的配置文件
 def saveServiceFile(request):
     data = request.FILES.get('file')
-    print('-'*10,type(data))
     create_time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
     saveServiceFilePath.objects.create(create_time=create_time,file_url=data)
-    print("2525252525,path=",data)
     return JsonResponse({
         "path": "/Service_file/"+str(data)
     })
@@ -49,13 +47,10 @@ def submitService(request):
 def getData(request):
     type = request.GET.get('type')
     service_type = request.GET.get('service_type')
-    print("5353535353", service_type)
-    print("type=", type)
     if type == "1":
         # 开发者查询
         dev_name = request.GET.get('dev_name')
         find_data = Service.objects.filter(developer=dev_name,type=service_type).values()
-        print(find_data.all())
         return_data = {}
         return_data['data'] = list(find_data)
         return JsonResponse(return_data)
@@ -65,8 +60,6 @@ def getData(request):
     if type == "3":
         # 用户获取数据
         find_data = Service.objects.filter(type=service_type).values()
-        print("service_views.py",find_data.all())
         return_data = {}
         return_data['data'] = list(find_data)
-        print("71717171",return_data)
         return JsonResponse(return_data)

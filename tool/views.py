@@ -18,10 +18,8 @@ class submitForm(forms.Form):
 
 def uploadTool(request):
     data = request.FILES.get('file')
-    print('-' * 10, type(data))
     create_time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
     SaveToolPath.objects.create(create_time=create_time, file_url=data)
-    print("666666666666,path=", data)
     return JsonResponse({
                 "path": "/Tool_upload/" + str(data)
             })
@@ -50,11 +48,9 @@ def saveTool(request):
 def getData(request):
     dev_name = request.GET.get('dev_name')
     type = request.GET.get('type')
-    print("type=",type)
     if type == "1":
         # 开发者查询
         find_data = Tool.objects.filter(tool_uploader=dev_name).values()
-        print(find_data.all())
         return_data = {}
         return_data['data'] = list(find_data)
         return JsonResponse(return_data)

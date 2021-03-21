@@ -31,7 +31,6 @@ class DeveloperForm_r(forms.Form):
 def register(request):
     if request.method == 'POST':
         uf = UserForm_r(request.POST)
-        print(3434343434, uf)
         if uf.is_valid():
             username = uf.cleaned_data['username']
             password = uf.cleaned_data['password']
@@ -84,18 +83,12 @@ class UserForm_l(forms.Form):
 def login(request):
     if request.method == 'POST':
         uf_l = UserForm_l(request.POST)
-        print(55555555555555555)
         if uf_l.is_valid():
             type = uf_l.cleaned_data['type']
             username = uf_l.cleaned_data['username']
             password = uf_l.cleaned_data['password']
-            print(username, password)
             # 用户认证
-            print(94949494,type)
-            print(95959595,username)
-            print(96969696,password)
             re = auth.authenticate(username=username, password=password, type=type)
-            print("re=", re)
             if re.type == type:
                 auth.login(request, re)  # 登录成功,这个login方法还可以把用户数据保存在session中
                 return JsonResponse({
@@ -119,7 +112,6 @@ def login(request):
 
 
 def logout(request):
-    print(8787878787)
     auth.logout(request)
     return JsonResponse({"detail": "您已退出登录"})
 
@@ -128,11 +120,9 @@ def logout(request):
 def login_session(request):
     if request.method == 'POST':
         uf_l = UserForm_l(request.POST)
-        print(55555555555555555)
         if uf_l.is_valid():
             username = uf_l.cleaned_data['username']
             password = uf_l.cleaned_data['password']
-            print(username, password)
             try:
                 get_user = User.objects.get(username=username)
                 if get_user:
