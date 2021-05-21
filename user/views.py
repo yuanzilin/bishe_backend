@@ -2,6 +2,10 @@ import json
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, Http404, JsonResponse
+
+from problem.models import Problem
+from service.models import Service
+from tool.models import Tool
 from .models import *
 from django.contrib import auth
 from django import forms  # 导入表单
@@ -89,14 +93,40 @@ def login(request):
             password = uf_l.cleaned_data['password']
             # 用户认证
             re = auth.authenticate(username=username, password=password, type=type)
-            if re.type == type:
-                auth.login(request, re)  # 登录成功,这个login方法还可以把用户数据保存在session中
-                return JsonResponse({
-                    "code": 202,
-                    "username": username,
-                    "password": password,
-                    "detail": "登录成功!"
-                })
+
+            if re.type == type or re.is_superuser==1:
+                if type!="developer":
+                    auth.login(request, re)  # 登录成功,这个login方法还可以把用户数据保存在session中
+                    return JsonResponse({
+                        "code": 202,
+                        "username": username,
+                        "password": password,
+                        "detail": "登录成功!"
+                    })
+                elif re.qualified==0:
+                    return JsonResponse({
+                        "code": 204,
+                        "username": username,
+                        "password": password,
+                        "detail": "该开发者账号尚未通过审核"
+                    })
+                elif re.qualified==2:
+                    User.objects.filter(username=username,type="developer").delete()
+                    return JsonResponse({
+                        "code": 205,
+                        "username": username,
+                        "password": password,
+                        "detail": "该开发者账号申请被拒"
+                    })
+
+                else:
+                    return JsonResponse({
+                        "code": 202,
+                        "username": username,
+                        "password": password,
+                        "detail": "登录成功!"
+                    })
+
             else:
                 return JsonResponse({
                     "code": 201,
@@ -116,26 +146,71 @@ def logout(request):
     return JsonResponse({"detail": "您已退出登录"})
 
 
-# 用session实现登录功能
-def login_session(request):
-    if request.method == 'POST':
-        uf_l = UserForm_l(request.POST)
-        if uf_l.is_valid():
-            username = uf_l.cleaned_data['username']
-            password = uf_l.cleaned_data['password']
-            try:
-                get_user = User.objects.get(username=username)
-                if get_user:
-                    if(get_user.username==username and get_user.password==password):
-                        session_list = []  # session列表
-                        for se in session_list:
-                            if get_user.username==se['username']:
-                                Session.objects.filter(session_key=se.session['session_key'])
-                                break
-                        request.session['username']=get_user['username']
-                        request.session['password']=get_user['password']
-                        status = 1
-                else:
-                    pass
-            except:
-                pass
+def getAllUser(request):
+    type=request.GET.get('type')
+    status=request.GET.get('status')
+    if status=="-1":
+        find_data=User.objects.filter(type=type).values()
+        return_data={}
+        return_data['data']=list(find_data)
+        return JsonResponse(return_data)
+    else:
+        find_data = User.objects.filter(type=type,qualified=status).values()
+        return_data = {}
+        return_data['data'] = list(find_data)
+        return JsonResponse(return_data)
+
+def deleteUser(request):
+    post_json = json.loads(request.body.decode('utf-8'))
+    print("deleteTool,post_json=", post_json)
+    id = post_json['id']
+    type=post_json['type']
+    print("168168,type=",type)
+    result=User.objects.get(id=id)
+    User.objects.get(id=id).delete()
+    print("159,user-views,username=",result.username)
+    if(type=="user"):
+        Problem.objects.filter(user_submit=result.username).delete()
+    if(type=="developer"):
+        print("176176176,developer=",result.username)
+        print("175175,deleteUser,tool=",Tool.objects.filter(tool_uploader=result.username))
+        Tool.objects.filter(tool_uploader=result.username).delete()
+        Service.objects.filter(developer=result.username).delete()
+    return JsonResponse({
+        "feedback": "success"
+    })
+
+def deleteDeveloper(request):
+    pass
+
+def reviewDeveloper(request):
+    post_json=json.loads(request.body.decode('utf-8'))
+    id=post_json['id']
+    flag=post_json['flag']
+    result=User.objects.get(type="developer",id=id)
+    if(flag==1):
+        result.qualified=1
+    if(flag==2):
+        result.qualified=2
+    result.save()
+    return JsonResponse({
+        "feedback": "success"
+    })
+
+def logoutuser(request):
+    post_json=json.loads(request.body.decode('utf-8'))
+    print("post_json=",post_json)
+    type=post_json["type"]
+    username=post_json["username"]
+    print("user-views.py,205,post_json=",post_json)
+    if type == "developer":
+        user = User.objects.get(type=type, username=username)
+        user.delete()
+    if type == "user":
+        Problem.objects.filter(user_submit=username).delete()
+        user=User.objects.get(type="user",username=username)
+        user.delete()
+    return JsonResponse({
+        "feedback": "注销成功"
+    })
+

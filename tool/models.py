@@ -8,6 +8,7 @@ class Tool(models.Model):
     toolname = models.CharField(max_length=100)
     toolpath = models.CharField(max_length=100)
     # services = models.CharField(max_length=100)
+    toolDetail=models.TextField(default="")
 
 
 class SaveToolPath(models.Model):

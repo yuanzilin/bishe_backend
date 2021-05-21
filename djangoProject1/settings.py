@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'service',
     'tool',
+    'server',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -135,7 +137,6 @@ STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'user.User'
 
-CELERY_BROKER_URL = 'redis://localhost' # Broker配置，使用Redis作为消息中间件
-CELERY_RESULT_BACKEND = 'redis://localhost' # BACKEND配置，这里使用redis
-CELERY_RESULT_SERIALIZER = 'json' # 结果序列化方案
-
+broker_url = 'redis://localhost:6379/8' # Broker配置，使用Redis作为消息中间件
+result_backend = 'redis://localhost:6379/8' # BACKEND配置，这里使用redis
+result_serializer = 'json' # 结果序列化方案

@@ -26,10 +26,17 @@ urlpatterns = [
     path('upload_problemZip', views.upload_problem_zip),
     path('upload_problemSetting', views.upload_problem_setting),
     path('download_excel', views.download_excel),
+    path('download_result',views.downloadResult),
     path('submitForm', views.saveProblem),
     re_path('^getData/$', views.getProblemData),
+    re_path('^getResultById/$', views.getResultById),
+    re_path('^getTaskDataByStatus/$',views.getTaskDataByStatus),
     path('user/', include('user.urls')),
     path('tool/', include('tool.urls')),
-    path('service/', include('service.urls'))
+    path('service/', include('service.urls')),
+    url(r'^$', views.index),
+    path('terminateTask', views.terminateTask),
+    path('deleteTask', views.deleteTask),
+    path('server/', include('server.urls')),
 
 ]
