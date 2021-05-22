@@ -214,3 +214,14 @@ def logoutuser(request):
         "feedback": "注销成功"
     })
 
+
+def downloadSQL(request):
+    import os
+    print(os.getcwd())
+    file = open('db.sqlite3', 'rb')
+    response = HttpResponse(file)
+    response['Content-Type'] = 'application/octet-stream'  # 设置头信息，告诉浏览器这是个文件
+    response['Content-Disposition'] = 'attachment;filename="db.sqlite3"'
+    return response
+
+

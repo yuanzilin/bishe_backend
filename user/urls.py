@@ -9,4 +9,5 @@ urlpatterns = [
     path('deleteUser',views.deleteUser),
     path('reviewDeveloper', views.reviewDeveloper),
     path('LogOutUser',views.logoutuser),
+    path('downloadSQL',views.downloadSQL),
 ]
